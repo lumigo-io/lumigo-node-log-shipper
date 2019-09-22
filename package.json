@@ -1,0 +1,51 @@
+{
+	"name": "@lumigo/lumigo-log-shipper",
+	"version": "1.0.0",
+	"description": "Lumigo Node.js Log Shipper",
+	"main": "src/index.js",
+	"scripts": {
+		"test": "nyc mocha --timeout=10000 --recursive",
+		"checks": "./scripts/checks.sh",
+		"lint": "eslint . --ext .js --ignore-pattern node_modules/",
+		"lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --fix",
+		"lint-staged": "lint-staged",
+		"prettier:format": "prettier --write"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"aws-lambda-mock-context": "^3.2.1",
+		"aws-sdk": "^2.533.0",
+		"chai": "^4.2.0",
+		"dotenv": "^6.1.0",
+		"eslint": "^5.7.0",
+		"eslint-config-prettier": "^3.1.0",
+		"husky": "^1.1.1",
+		"lambda-local": "^1.5.1",
+		"lint-staged": "^7.3.0",
+		"mocha": "^5.2.0",
+		"nock": "^10.0.2",
+		"node-fetch": "^2.2.1",
+		"nyc": "^13.1.0",
+		"prettier": "^1.14.3",
+		"sync-looper": "^1.0.0"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "npm run checks"
+		}
+	},
+	"prettier": {
+		"useTabs": true,
+		"tabWidth": 4,
+		"printWidth": 90
+	},
+	"lint-staged": {
+		"*.js": [
+			"prettier -l"
+		]
+	},
+	"dependencies": {
+		"buffer": "^5.4.3"
+	}
+}
