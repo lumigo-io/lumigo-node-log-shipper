@@ -31,10 +31,27 @@ function put_records(records, streamName) {
 				reject(err);
 		  }
 		  else {
+		  		// console.log(data);
 				resolve(data);
 		  }
 		});
 	});
+}
+
+function parse_kinesis_problematic_records(records) {
+	let problamatic_records = records;
+	let retryItems = [];
+	let badItems = [];
+	problamatic_records.forEach(function (record, index) {
+		if (record.hasOwnProperty("ErrorCode")) {
+			if (record["ErrorCode"] in ALLOW_RETRY_ERROR_CODES) {
+				retryItems.push(index);
+			} else {
+				badItems.push(index);
+			}
+		}
+	});
+	return [retryItems, badItems];
 }
 
 exports.sendLogs = async function(records) {
@@ -53,19 +70,27 @@ exports.sendLogs = async function(records) {
 		}
 		records_to_write.push(event);
 		if (raw_events.length === 0 || records_to_write.length === MAX_KINESIS_BATCH_SIZE) {
-			let number_of_records = records_to_write.length;
+			// let number_of_records = records_to_write.length;
 			try {
 				let response = await put_records(records_to_write, STREAM_NAME);
 
 				// todo: the things below
 
 				// deal with retries/ bads
+				let problematicRecords = parse_kinesis_problematic_records(response["Records"]);
+				let retryItems = problematicRecords[0];
+				// let badItems = problematicRecords[1];
 
 				// add retry count to `retry_items_len`
+				retry_items_len += retryItems.length;
 
 				// add retires back to raw_events
+				for (let record in retryItems) {
+					raw_events.push(records_to_write[record]);
+				}
 
 				// log iteration
+				// log? badItems
 
 				response_records = response_records.concat(response["Records"]);
 			} catch (error) {
