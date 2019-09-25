@@ -1,5 +1,11 @@
 const awsUtils = require("../utils/aws_utils");
 
+let FILTER_KEYWORDS = [
+	"Task timed out",
+	"Process exited before completing request",
+	"REPORT RequestId",
+];
+
 module.exports = {
 	convertToLumigoRecords: function(awsLogEvent) {
 	    let records = [];
@@ -28,5 +34,30 @@ module.exports = {
 			});
 		}
 		return records;
-	}
+	},
+
+	validEvent: function(record) {
+		let returnValue = false;
+		FILTER_KEYWORDS.forEach(function (keyword) {
+			if (record["message"].includes(keyword)) {
+				returnValue =  true;
+			}
+		});
+		return returnValue;
+	},
+
+	filterRecords: function(records, programaticError) {
+		let _this = this;
+		if (programaticError != null) {
+			FILTER_KEYWORDS.push(programaticError);
+		}
+		let filtered = [];
+		records["logEvents"].forEach(function(event) {
+			if (_this.validEvent(event)) {
+				filtered.push(event);
+			}
+		});
+		records["logEvents"] = filtered;
+		return records;
+	},
 };

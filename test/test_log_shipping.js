@@ -10,7 +10,7 @@ describe("log shipping functionality ", () => {
 		let fake = sinon.fake.returns({"FailedPutCount": 0, "RequestResponses": []});
 		sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose").resolves(fake());
 		LumigoLogger.log(fixutres.rawAwsEvent()).then(function(data) {
-			expect(data).to.eq(2);
+			expect(data).to.eq(1);
 			firehoseUtils.Firehose.prototype.pushToFirehose.restore();
 			done();
 		});
