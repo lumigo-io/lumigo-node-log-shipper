@@ -16,4 +16,13 @@ describe("log shipping functionality ", () => {
 		});
 		expect(fake.calledOnce).to.eq(true);
 	});
+
+	it("doesn't ship big event", (done) => {
+		sinon.stub(firehoseUtils.Firehose.prototype, "validFirehoseEvent").returns(false);
+		LumigoLogger.log(fixutres.bigRawEvent()).then(function(data) {
+			expect(data).to.eq(0);
+			firehoseUtils.Firehose.prototype.validFirehoseEvent.restore();
+			done();
+		});
+	});
 });
