@@ -80,8 +80,22 @@ describe("log shipping functionality ", () => {
 		});
 	});
 
-	it("puts records batch with retries", (done) => {
+	it("puts records batch with retries without exceptions", (done) => {
 		let fake1 = sinon.fake.returns({"FailedPutCount": 2, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}, {"ErrorCode": "ServiceUnavailableException"}]});
+		let fake2 = sinon.fake.returns({"FailedPutCount": 0, "RequestResponses": []});
+		let stub = sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose");
+		stub.onCall(0).resolves(fake1());
+		stub.onCall(1).resolves(fake1());
+		stub.onCall(2).resolves(fake2());
+		firehose.putRecordsBatch(fixutres.lumigoKinesisEvent()).then(function(response){
+			expect(response).to.eq(2);
+			firehose.pushToFirehose.restore();
+			done();
+		});
+	});
+
+	it("puts records batch with retries with exceptions", (done) => {
+		let fake1 = sinon.fake.rejects({"FailedPutCount": 2, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}, {"ErrorCode": "ServiceUnavailableException"}]});
 		let fake2 = sinon.fake.returns({"FailedPutCount": 0, "RequestResponses": []});
 		let stub = sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose");
 		stub.onCall(0).resolves(fake1());
