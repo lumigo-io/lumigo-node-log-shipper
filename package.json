@@ -42,10 +42,12 @@
 	},
 	"lint-staged": {
 		"*.js": [
-			"prettier -l"
+			"prettier"
 		]
 	},
 	"dependencies": {
-		"buffer": "^5.4.3"
+		"buffer": "^5.4.3",
+		"sinon": "^7.5.0",
+		"zlib": "^1.0.5"
 	}
 }
