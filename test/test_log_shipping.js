@@ -54,4 +54,13 @@ describe("log shipping functionality ", () => {
 			done();
 		});
 	});
+
+	it("ships 0 logs when kinesis couldn't be initiated", (done) => {
+		sinon.stub(stsUtils, "assumeRole").rejects({"error": true});
+		LumigoLogger.shipLogs(fixutres.rawAwsEvent()).then(function(data) {
+			expect(data).to.eq(0);
+			stsUtils.assumeRole.restore();
+			done();
+		});
+	});
 });
