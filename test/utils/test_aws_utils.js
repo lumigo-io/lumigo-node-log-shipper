@@ -9,7 +9,7 @@ describe("aws utils functionality ", () => {
 	});
 
 	it("returns correct function arn", () => {
-		expect(utils.getFunctionArn(fixutres.simpleAwsEvent())).to.eq("arn:aws:lambda:us-west-2:335722316285:function:test-http-req");
+		expect(utils.getFunctionArn(fixutres.simpleAwsEvent())).to.eq("arn:aws:lambda:us-west-2:142423218622:function:guymoses_customers-service_add-new-user");
 	});
 
 	it("getFunctionArn returns null when logGroups not provided", () => {

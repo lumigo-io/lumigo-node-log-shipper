@@ -1,35 +1,33 @@
-// const Buffer = require("buffer").Buffer;
 const AWS = require("aws-sdk");
 const REGION = process.env.AWS_REGION || "us-west-2";
 const ALLOW_RETRY_ERROR_CODES = ["ServiceUnavailableException", "InternalFailure"];
+const stsUtils = require("../utils/sts_utils");
 
 const MAX_RETRY_COUNT = 3;
 const MAX_ITEM_SIZE = 1048576;
 const MAX_FIREHOSE_BATCH_SIZE = 250;
 
-// let sts = new AWS.STS();
-// sts.assumeRole({
-// 	RoleArn: "arn:aws:iam::123456789:role/Developer",
-// 	RoleSessionName: "awssdk"
-// }, function(err, data) {
-//   		if (err) { // an error occurred
-//     	console.log("Cannot assume role");
-//     	console.log(err, err.stack);
-//   	} else { // successful response
-//     	AWS.config.update({
-//       	accessKeyId: data.Credentials.AccessKeyId,
-//       	secretAccessKey: data.Credentials.SecretAccessKey,
-//       	sessionToken: data.Credentials.SessionToken
-//     	});
-//   	}
-// });
-
 module.exports = {
 	Firehose: class {
-		constructor(streamName) {
+		constructor(streamName, accountId) {
 			this.streamName = streamName;
+			this.accountId = accountId;
 			AWS.config.update({region: REGION});
-			this.firehose = new AWS.Firehose();
+		}
+
+		async getFirehoseClient(callback) {
+			try {
+				let stsResponse = await stsUtils.assumeRole(this.accountId);
+				this.firehose = new AWS.Firehose({
+					"region": REGION,
+					"accessKeyId": stsResponse.Credentials.AccessKeyId,
+					"secretAccessKey": stsResponse.Credentials.SecretAccessKey,
+					"sessionToken": stsResponse.Credentials.SessionToken
+				});
+			} catch (e) {
+				throw e;
+			}
+			await callback();
 		}
 
 		async putRecordsBatch(records) {

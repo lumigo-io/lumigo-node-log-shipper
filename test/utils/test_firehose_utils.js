@@ -1,12 +1,21 @@
 const expect = require("chai").expect;
 const sinon = require("sinon");
 const firehoseUtils = require("../../src/utils/firehose_utils");
+const stsUtils = require("../../src/utils/sts_utils");
 const fixutres = require("../../test/fixtures");
 
 describe("log shipping functionality ", () => {
 	let firehose;
-	before(function() {
-		firehose = new firehoseUtils.Firehose("test-firehose-log-stream");
+	before(function(done) {
+		firehose = new firehoseUtils.Firehose("test-firehose-log-stream", "142423218622");
+		let getFirehoseClientFake = sinon.fake.returns({"Credentials": {
+			"AccessKeyId": "AccessKeyId",
+			"SecretAccessKey": "SecretAccessKey",
+			"SessionToken": "SessionToken"}});
+		sinon.stub(stsUtils, "assumeRole").resolves(getFirehoseClientFake());
+		firehose.getFirehoseClient(function (){
+			done();
+		});
 	});
 
 	it("converts to firehose events", () => {
@@ -63,7 +72,7 @@ describe("log shipping functionality ", () => {
 		let fake = sinon.fake.returns({"FailedPutCount": 0, "RequestResponses": []});
 		sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose").resolves(fake());
 		firehose.putRecordsBatch(fixutres.lumigoKinesisEvent()).then(function(response){
-			expect(response).to.eq(2);
+			expect(response).to.eq(1);
 			firehose.pushToFirehose.restore();
 			done();
 		});
@@ -71,7 +80,7 @@ describe("log shipping functionality ", () => {
 
 	it("puts records batch with greater than max retries", (done) => {
 
-		let fake = sinon.fake.returns({"FailedPutCount": 2, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}, {"ErrorCode": "ServiceUnavailableException"}]});
+		let fake = sinon.fake.returns({"FailedPutCount": 1, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}]});
 		sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose").resolves(fake());
 		firehose.putRecordsBatch(fixutres.lumigoKinesisEvent()).then(function(response){
 			expect(response).to.eq(0);
@@ -81,28 +90,28 @@ describe("log shipping functionality ", () => {
 	});
 
 	it("puts records batch with retries without exceptions", (done) => {
-		let fake1 = sinon.fake.returns({"FailedPutCount": 2, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}, {"ErrorCode": "ServiceUnavailableException"}]});
+		let fake1 = sinon.fake.returns({"FailedPutCount": 1, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}]});
 		let fake2 = sinon.fake.returns({"FailedPutCount": 0, "RequestResponses": []});
 		let stub = sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose");
 		stub.onCall(0).resolves(fake1());
 		stub.onCall(1).resolves(fake1());
 		stub.onCall(2).resolves(fake2());
 		firehose.putRecordsBatch(fixutres.lumigoKinesisEvent()).then(function(response){
-			expect(response).to.eq(2);
+			expect(response).to.eq(1);
 			firehose.pushToFirehose.restore();
 			done();
 		});
 	});
 
 	it("puts records batch with retries with exceptions", (done) => {
-		let fake1 = sinon.fake.rejects({"FailedPutCount": 2, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}, {"ErrorCode": "ServiceUnavailableException"}]});
+		let fake1 = sinon.fake.rejects({"FailedPutCount": 1, "RequestResponses": [{"ErrorCode": "ServiceUnavailableException"}]});
 		let fake2 = sinon.fake.returns({"FailedPutCount": 0, "RequestResponses": []});
 		let stub = sinon.stub(firehoseUtils.Firehose.prototype, "pushToFirehose");
 		stub.onCall(0).resolves(fake1());
 		stub.onCall(1).resolves(fake1());
 		stub.onCall(2).resolves(fake2());
 		firehose.putRecordsBatch(fixutres.lumigoKinesisEvent()).then(function(response){
-			expect(response).to.eq(2);
+			expect(response).to.eq(1);
 			firehose.pushToFirehose.restore();
 			done();
 		});

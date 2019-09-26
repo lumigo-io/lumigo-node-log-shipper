@@ -21,12 +21,14 @@ describe("general utils functionality ", () => {
 	});
 
 	it("adds programatic error and validates it", () => {
-		let programaticError = "123";
-		let event1 = fixutres.simpleAwsEvent();
-		let event2 = fixutres.simpleAwsEvent();
-		event2["logEvents"][0]["message"] = "12345";
 
-		expect(generalUtils.filterRecords(event1)["logEvents"]).to.have.lengthOf(1);
-		expect(generalUtils.filterRecords(event2, programaticError)["logEvents"]).to.have.lengthOf(2);
+		let programaticError = "[ERROR]";
+		let event1 = fixutres.simpleAwsEvent();
+		event1["logEvents"][0]["message"] = "SHOULD_NOT_WORK";
+		let event2 = fixutres.simpleAwsEvent();
+		event2["logEvents"][0]["message"] = "[ERROR] 12345";
+
+		expect(generalUtils.filterRecords(event1)["logEvents"]).to.have.lengthOf(0);
+		expect(generalUtils.filterRecords(event2, programaticError)["logEvents"]).to.have.lengthOf(1);
 	});
 });
