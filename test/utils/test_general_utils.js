@@ -29,6 +29,6 @@ describe("general utils functionality ", () => {
 		event2["logEvents"][0]["message"] = "[ERROR] 12345";
 
 		expect(generalUtils.filterRecords(event1)["logEvents"]).to.have.lengthOf(0);
-		expect(generalUtils.filterRecords(event2, programaticError)["logEvents"]).to.have.lengthOf(1);
+		expect(generalUtils.filterRecords(event2, programaticError)).to.eql(event2);
 	});
 });

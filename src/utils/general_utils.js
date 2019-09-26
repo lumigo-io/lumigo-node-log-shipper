@@ -16,20 +16,18 @@ module.exports = {
 		}
 		if (awsLogEvent.hasOwnProperty("logEvents") && Array.isArray(awsLogEvent["logEvents"])) {
 		    awsLogEvent["logEvents"].forEach(function(event) {
-				let convertedEvent = {};
-				convertedEvent["event_details"] = {};
-				convertedEvent["event_details"]["function_details"] = {};
-
-				if (event.hasOwnProperty("message")) {
-					convertedEvent["message"] = event["message"];
-				}
-				if (event.hasOwnProperty("timestamp")) {
-					convertedEvent["timestamp"] = event["timestamp"];
-					convertedEvent["event_details"]["timestamp"] = event["timestamp"];
-				}
-				convertedEvent["event_details"]["aws_account_id"] = owner;
-				convertedEvent["event_details"]["function_details"]["resource_id"] = functionArn;
-				convertedEvent["event_details"]["function_details"]["memory"] = 0;  // We cant get memory of the running function from the log-shipper function
+				let convertedEvent = {
+					"message": event["message"],
+					"timestamp": event["timestamp"],
+					"event_details": {
+						"timestamp": event["timestamp"],
+						"aws_account_id": owner,
+						"function_details": {
+							"resource_id": functionArn,
+							"memory": 0 // We cant get memory of the running function from the log-shipper function
+						}
+					}
+				};
 				records.push(convertedEvent);
 			});
 		}
