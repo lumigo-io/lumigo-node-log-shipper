@@ -18,7 +18,7 @@ exports.shipLogs = async function(records, programaticError=null) {
 			});
 			return result;
 		} catch (e) {
-			return 0;
+			// couldn't ship logs
 		}
 	}
 	return 0;

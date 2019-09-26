@@ -1,6 +1,7 @@
 const expect = require("chai").expect;
 const sinon = require("sinon");
 const LumigoLogger = require("../src/index");
+const awsUtils = require("../src/utils/aws_utils");
 const firehoseUtils = require("../src/utils/firehose_utils");
 const stsUtils = require("../src/utils/sts_utils");
 const fixutres = require("../test/fixtures");
@@ -31,10 +32,25 @@ describe("log shipping functionality ", () => {
 			"secretAccessKey": "SecretAccessKey",
 			"sessionToken": "SessionToken"}});
 		sinon.stub(stsUtils, "assumeRole").resolves(getFirehoseClientFake());
-		LumigoLogger.shipLogs(fixutres.rawAwsEvent(),"[ERROR]").then(function(data) {
+		LumigoLogger.shipLogs(fixutres.rawAwsEvent()).then(function(data) {
 			expect(data).to.eq(0);
 			stsUtils.assumeRole.restore();
 			firehoseUtils.Firehose.prototype.validFirehoseEvent.restore();
+			done();
+		});
+	});
+
+	it("doesn't ship anything", (done) => {
+		sinon.stub(awsUtils, "extractAwsLogEvent").returns({"logEvents": []});
+		let getFirehoseClientFake = sinon.fake.returns({"Credentials": {
+			"accessKeyId": "AccessKeyId",
+			"secretAccessKey": "SecretAccessKey",
+			"sessionToken": "SessionToken"}});
+		sinon.stub(stsUtils, "assumeRole").resolves(getFirehoseClientFake());
+		LumigoLogger.shipLogs({}).then(function(data) {
+			expect(data).to.eq(0);
+			awsUtils.extractAwsLogEvent.restore();
+			stsUtils.assumeRole.restore();
 			done();
 		});
 	});
