@@ -36,14 +36,13 @@ module.exports = {
 		return records;
 	},
 
-	validEvent: function(record) {
-		let returnValue = false;
-		FILTER_KEYWORDS.forEach(function (keyword) {
-			if (record["message"].includes(keyword)) {
-				returnValue =  true;
+	isValidEvent: function(record) {
+		for (let i = 0; i <FILTER_KEYWORDS.length; i++) {
+			if (record["message"].includes(FILTER_KEYWORDS[i])) {
+				return true;
 			}
-		});
-		return returnValue;
+		}
+		return false;
 	},
 
 	filterRecords: function(records, programaticError) {
@@ -51,13 +50,7 @@ module.exports = {
 		if (programaticError != null) {
 			FILTER_KEYWORDS.push(programaticError);
 		}
-		let filtered = [];
-		records["logEvents"].forEach(function(event) {
-			if (_this.validEvent(event)) {
-				filtered.push(event);
-			}
-		});
-		records["logEvents"] = filtered;
+		records["logEvents"] = records["logEvents"].filter(event => _this.isValidEvent(event));
 		return records;
 	},
 };

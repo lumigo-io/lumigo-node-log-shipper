@@ -14,10 +14,10 @@ describe("general utils functionality ", () => {
 		let record3 = {"message": "REPORT RequestId"};
 		let record4 = {"message": "NON-VALID-EVENT"};
 
-		expect(generalUtils.validEvent(record1)).to.eq(true);
-		expect(generalUtils.validEvent(record2)).to.eq(true);
-		expect(generalUtils.validEvent(record3)).to.eq(true);
-		expect(generalUtils.validEvent(record4)).to.eq(false);
+		expect(generalUtils.isValidEvent(record1)).to.eq(true);
+		expect(generalUtils.isValidEvent(record2)).to.eq(true);
+		expect(generalUtils.isValidEvent(record3)).to.eq(true);
+		expect(generalUtils.isValidEvent(record4)).to.eq(false);
 	});
 
 	it("adds programatic error and validates it", () => {
