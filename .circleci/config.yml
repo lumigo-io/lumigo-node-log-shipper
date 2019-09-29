@@ -32,7 +32,7 @@ jobs:
       - run: export AWS_DEFAULT_REGION=us-west-2 && export USER=CICD && ./scripts/checks.sh
       - run: bash <(curl -s https://codecov.io/bash)
 
-deploy:
+  deploy:
     <<: *defaults
     steps:
       - run: ./scripts/bd_to_prod.sh
