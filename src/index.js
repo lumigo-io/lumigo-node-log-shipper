@@ -1,8 +1,7 @@
 const firehoseUtils = require("./utils/firehose_utils");
 const awsUtils = require("./utils/aws_utils");
 const generalUtils = require("./utils/general_utils");
-
-const STREAM_NAME = "test-firehose-log-stream";
+const consts = require("./utils/consts");
 
 exports.shipLogs = async function(records, programaticError=null) {
 	let extracted_records = awsUtils.extractAwsLogEvent(records);
@@ -10,7 +9,7 @@ exports.shipLogs = async function(records, programaticError=null) {
 	let firehoseRecords = generalUtils.convertToLumigoRecords(filteredRecords);
 	if (firehoseRecords.length > 0) {
 		let accountId = firehoseRecords[0]["event_details"]["aws_account_id"];
-		let firehose = new firehoseUtils.Firehose(STREAM_NAME, accountId);
+		let firehose = new firehoseUtils.Firehose(consts.STREAM_NAME, accountId);
 		let result = 0;
 		try {
 			await firehose.getFirehoseClient(async function (){

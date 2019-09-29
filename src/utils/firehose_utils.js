@@ -16,17 +16,13 @@ module.exports = {
 		}
 
 		async getFirehoseClient(callback) {
-			try {
-				let stsResponse = await stsUtils.assumeRole(this.accountId);
-				this.firehose = new AWS.Firehose({
-					"region": REGION,
-					"accessKeyId": stsResponse.Credentials.AccessKeyId,
-					"secretAccessKey": stsResponse.Credentials.SecretAccessKey,
-					"sessionToken": stsResponse.Credentials.SessionToken
-				});
-			} catch (e) {
-				throw e;
-			}
+			let stsResponse = await stsUtils.assumeRole(this.accountId);
+			this.firehose = new AWS.Firehose({
+				"region": REGION,
+				"accessKeyId": stsResponse.Credentials.AccessKeyId,
+				"secretAccessKey": stsResponse.Credentials.SecretAccessKey,
+				"sessionToken": stsResponse.Credentials.SessionToken
+			});
 			await callback();
 		}
 
