@@ -24,7 +24,6 @@ jobs:
   test:
     <<: *defaults
     steps:
-      - checkout_code
       - run:
           name: install-npm
           command: npm install
