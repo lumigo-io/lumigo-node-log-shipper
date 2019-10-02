@@ -14,19 +14,21 @@ describe("general utils functionality ", () => {
 		let record3 = {"message": "REPORT RequestId"};
 		let record4 = {"message": "NON-VALID-EVENT"};
 
-		expect(generalUtils.validEvent(record1)).to.eq(true);
-		expect(generalUtils.validEvent(record2)).to.eq(true);
-		expect(generalUtils.validEvent(record3)).to.eq(true);
-		expect(generalUtils.validEvent(record4)).to.eq(false);
+		expect(generalUtils.isValidEvent(record1)).to.eq(true);
+		expect(generalUtils.isValidEvent(record2)).to.eq(true);
+		expect(generalUtils.isValidEvent(record3)).to.eq(true);
+		expect(generalUtils.isValidEvent(record4)).to.eq(false);
 	});
 
 	it("adds programatic error and validates it", () => {
-		let programaticError = "123";
-		let event1 = fixutres.simpleAwsEvent();
-		let event2 = fixutres.simpleAwsEvent();
-		event2["logEvents"][0]["message"] = "12345";
 
-		expect(generalUtils.filterRecords(event1)["logEvents"]).to.have.lengthOf(1);
-		expect(generalUtils.filterRecords(event2, programaticError)["logEvents"]).to.have.lengthOf(2);
+		let programaticError = "[ERROR]";
+		let event1 = fixutres.simpleAwsEvent();
+		event1["logEvents"][0]["message"] = "SHOULD_NOT_WORK";
+		let event2 = fixutres.simpleAwsEvent();
+		event2["logEvents"][0]["message"] = "[ERROR] 12345";
+
+		expect(generalUtils.filterRecords(event1)["logEvents"]).to.have.lengthOf(0);
+		expect(generalUtils.filterRecords(event2, programaticError)).to.eql(event2);
 	});
 });
