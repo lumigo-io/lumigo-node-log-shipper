@@ -3,7 +3,8 @@
     "browser": false,
     "es6": true,
     "mocha": true,
-    "node": true
+    "node": true,
+    "jest/globals": true
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -45,6 +46,7 @@
   },
 
   "plugins": [
+    "jest",
     "@typescript-eslint"
   ]
 }

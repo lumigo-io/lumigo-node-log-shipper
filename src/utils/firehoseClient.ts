@@ -3,8 +3,9 @@ import { AWSError } from "aws-sdk/lib/error";
 
 import AWS from "aws-sdk";
 import { assumeRole } from "./stsUtils";
+import { getCurrentRegion } from "./awsUtils";
+import { AwsLogSubscriptionEvent } from "../types/awsTypes";
 
-const REGION = process.env.AWS_REGION || "us-west-2";
 const ALLOW_RETRY_ERROR_CODES = ["ServiceUnavailableException", "InternalFailure"];
 
 const MAX_RETRY_COUNT = 3;
@@ -26,21 +27,21 @@ export class FirehoseClient {
 	constructor(streamName: string, accountId: string) {
 		this.streamName = streamName;
 		this.accountId = accountId;
-		AWS.config.update({ region: REGION });
 	}
 
 	private async getFirehoseClient(): Promise<AWS.Firehose> {
 		const stsResponse = await assumeRole(this.accountId);
 		if (!stsResponse.Credentials) throw Error("AssumeRoleFailed");
+		const region = getCurrentRegion();
 		return new AWS.Firehose({
-			region: REGION,
+			region: region,
 			accessKeyId: stsResponse.Credentials.AccessKeyId,
 			secretAccessKey: stsResponse.Credentials.SecretAccessKey,
 			sessionToken: stsResponse.Credentials.SessionToken
 		});
 	}
 
-	async putRecordsBatch(records: any) {
+	async putRecordsBatch(records: AwsLogSubscriptionEvent[]) {
 		const itemMaxSize = getItemMaxSize();
 		let recordsToWrite = [];
 		let numberOfRecords = 0;
