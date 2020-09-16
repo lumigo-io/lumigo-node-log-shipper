@@ -1,9 +1,6 @@
-let ENV;
-if (process.env.AWS_EXECUTION_ENV === "true") {
-	ENV = process.env.ENV;
-} else {
-	ENV = process.env.USER;
-}
+const runOnAws = process.env.AWS_EXECUTION_ENV === "true";
+const ENV = runOnAws ? process.env.ENV : process.env.USER;
+
 let TARGET_ENV = process.env.TARGET_ENV;
 if (TARGET_ENV === undefined || TARGET_ENV === "") {
 	TARGET_ENV = "prod";
