@@ -8,7 +8,8 @@
 		"checks": "./scripts/checks.sh",
 		"lint:fix": "eslint ./src --ext .ts --ignore-pattern node_modules/ --fix",
 		"lint-staged": "lint-staged",
-		"prettier:fix": "prettier --write \"./src/**/*.ts\""
+		"prettier:fix": "prettier --write \"./src/**/*.ts\"",
+		"prettier:check": "prettier --check \"./src/**/*.ts\""
 	},
 	"author": "",
 	"license": "ISC",

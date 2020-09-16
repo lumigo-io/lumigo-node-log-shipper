@@ -3,7 +3,14 @@ import { getFunctionArn } from "./awsUtils";
 let FILTER_KEYWORDS = [
 	"Task timed out",
 	"Process exited before completing request",
-	"REPORT RequestId"
+	"REPORT RequestId",
+	"[ERROR]",
+	"[LUMIGO_LOG]",
+	"@lumigo",
+	"LambdaRuntimeClientError",
+	"Invoke Error",
+	"Uncaught Exception",
+	"Unhandled Promise Rejection"
 ];
 
 export const convertToLumigoRecords = function(awsLogEvent: any) {
