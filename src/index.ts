@@ -15,7 +15,6 @@ export const shipLogs = async function(
 			return await firehose.putRecordsBatch([filteredRecord]);
 		}
 	} catch (e) {
-		console.log(e);
 		// couldn't ship logs
 	}
 	return 0;
