@@ -4,33 +4,30 @@
 	"description": "Lumigo Node.js Log Shipper",
 	"main": "src/index.js",
 	"scripts": {
-		"test": "nyc mocha --timeout=10000 --recursive",
+		"test": "jest",
 		"checks": "./scripts/checks.sh",
-		"lint": "eslint . --ext .js --ignore-pattern node_modules/",
-		"lint:fix": "eslint . --ext .js --ignore-pattern node_modules/ --fix",
+		"lint:fix": "eslint ./src --ext .ts --ignore-pattern node_modules/ --fix",
 		"lint-staged": "lint-staged",
-		"prettier:format": "prettier --write"
+		"prettier:fix": "prettier --write \"./src/**/*.ts\"",
+		"prettier:check": "prettier --check \"./src/**/*.ts\""
 	},
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"@types/jest": "^26.0.13",
+		"@types/node": "^14.10.2",
+		"@typescript-eslint/eslint-plugin": "^4.1.1",
+		"@typescript-eslint/parser": "^4.1.1",
 		"aws-sdk": "^2.533.0",
-		"chai": "^4.2.0",
 		"eslint": "^5.7.0",
 		"eslint-config-prettier": "^3.1.0",
-		"husky": "^1.1.1",
+		"jest": "^26.4.2",
 		"lint-staged": "^7.3.0",
-		"mocha": "^5.2.0",
 		"nock": "^10.0.2",
-		"nyc": "^13.1.0",
 		"prettier": "^1.14.3",
-		"sinon": "^7.5.0",
+		"ts-jest": "^26.3.0",
+		"typescript": "^4.0.2",
 		"zlib": "^1.0.5"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "npm run checks"
-		}
 	},
 	"prettier": {
 		"useTabs": true,
@@ -44,5 +41,8 @@
 	},
 	"dependencies": {
 		"buffer": "^5.4.3"
-	}
+	},
+	"files": [
+		"dist/**/*"
+	]
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
-npm test
-npm run lint
-npm run lint-staged
+npm run prettier:check
+npm run lint:fix
+npm run test
