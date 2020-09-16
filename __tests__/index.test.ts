@@ -1,16 +1,15 @@
-import {shipLogs} from "../src";
+import { shipLogs } from "../src";
 import * as stsUtils from "../src/utils/stsUtils";
 import * as fixutres from "../__testUtils__/fixtures";
 
 //TODO: Remove this mocks into a infra mocker
 export const STS_MOCKED_RESPONSE: any = {
-			Credentials: {
-				AccessKeyId: "AccessKeyId",
-				SecretAccessKey: "SecretAccessKey",
-				SessionToken: "SessionToken"
-			}
-		};
-
+	Credentials: {
+		AccessKeyId: "AccessKeyId",
+		SecretAccessKey: "SecretAccessKey",
+		SessionToken: "SessionToken"
+	}
+};
 
 //TODO: Remove this mocks into a infra mocker
 describe("log shipping functionality ", () => {
@@ -25,7 +24,7 @@ describe("log shipping functionality ", () => {
 		process.env.LUMIGO_ITEM_MAX_SIZE = String(1);
 
 		const result = await shipLogs(fixutres.rawAwsEvent());
-		expect(result).toEqual(0)
+		expect(result).toEqual(0);
 	});
 
 	it("doesn't ship anything", async () => {

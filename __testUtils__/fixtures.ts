@@ -1,3 +1,5 @@
+import { AwsLogSubscriptionEvent } from "../src/types/awsTypes";
+
 export function firehoseEvents() {
 	return [
 		{
@@ -7,7 +9,7 @@ export function firehoseEvents() {
 	];
 }
 
-export function simpleAwsEvent(): any {
+export function simpleAwsEvent(): AwsLogSubscriptionEvent {
 	return {
 		messageType: "DATA_MESSAGE",
 		owner: "142423218622",
@@ -20,28 +22,6 @@ export function simpleAwsEvent(): any {
 				timestamp: 1569495175073,
 				message:
 					'[ERROR] ParameterNotFound: Missing Authorization\rTraceback (most recent call last):\r  File "/var/task/lumigo_tracer/sync_http/sync_hook.py", line 134, in lambda_wrapper\r    return func(*args, **kwargs)\r  File "/var/task/_lumigo/add-new-user.py", line 7, in handler\r    return userHandler(event, context)\r  File "/var/task/lumigo_common_utils/aws/aws_utils.py", line 375, in wrapper\r    args[0]["customer_id"] = get_authenticated_customer_id(args[0])\r  File "/var/task/lumigo_common_utils/aws/aws_utils.py", line 348, in get_authenticated_customer_id\r    customer_id = get_jwt_payload_attribute_or_default(event, "custom:customer")\r  File "/var/task/lumigo_common_utils/aws/aws_utils.py", line 331, in get_jwt_payload_attribute_or_default\r    token = get_header_or_fail(event, "Authorization")\r  File "/var/task/lumigo_common_utils/aws/aws_utils.py", line 267, in get_header_or_fail\r    raise ParameterNotFound(f"Missing {name}")\n'
-			}
-		]
-	};
-}
-
-export function simpleAwsEventWithNoLogGroup(): any {
-	return {
-		messageType: "DATA_MESSAGE",
-		owner: "335722316285",
-		logStream: "2019/09/23/[$LATEST]041e7430c6d94506b2bc7b29bd021803",
-		subscriptionFilters: ["LambdaStream_random"],
-		logEvents: [
-			{
-				id: "34995183731613629262151179513935230756777419834003488768",
-				timestamp: 1569238311100,
-				message: "END RequestId: 972f23e6-efab-4897-80a0-12b8f8a28190\n"
-			},
-			{
-				id: "34995183731613629262151179513935230756777419834003488769",
-				timestamp: 1569238311100,
-				message:
-					"REPORT RequestId: 972f23e6-efab-4897-80a0-12b8f8a28190\tDuration: 100.00 ms\tBilled Duration: 200 ms\tMemory Size: 128 MB\tMax Memory Used: 75 MB\tInit Duration: 156.08 ms\t\nXRAY TraceId: 1-5d88ad26-af7e1cf86161c0887567eed0\tSegmentId: 2ea934c013374041\tSampled: false\t\n"
 			}
 		]
 	};

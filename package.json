@@ -6,9 +6,10 @@
 	"scripts": {
 		"test": "jest",
 		"checks": "./scripts/checks.sh",
+		"ts": "tsc",
 		"lint:fix": "eslint ./src --ext .ts --ignore-pattern node_modules/ --fix",
 		"lint-staged": "lint-staged",
-		"prettier:fix": "prettier --write \"./src/**/*.ts\"",
+		"prettier:fix": "prettier --write \"./**/*.ts\"",
 		"prettier:check": "prettier --check \"./src/**/*.ts\""
 	},
 	"author": "",
@@ -19,8 +20,9 @@
 		"@typescript-eslint/eslint-plugin": "^4.1.1",
 		"@typescript-eslint/parser": "^4.1.1",
 		"aws-sdk": "^2.533.0",
-		"eslint": "^5.7.0",
+		"eslint": "^5.16.0",
 		"eslint-config-prettier": "^3.1.0",
+		"eslint-plugin-jest": "^24.0.1",
 		"jest": "^26.4.2",
 		"lint-staged": "^7.3.0",
 		"nock": "^10.0.2",
