@@ -10,7 +10,8 @@ let FILTER_KEYWORDS = [
 	"LambdaRuntimeClientError",
 	"Invoke Error",
 	"Uncaught Exception",
-	"Unhandled Promise Rejection"
+	"Unhandled Promise Rejection",
+	"Traceback"
 ];
 
 export const isValidEvent = function(record: AwsLogEvent): boolean {
