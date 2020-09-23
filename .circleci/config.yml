@@ -39,11 +39,9 @@ workflows:
         filters:
           branches:
             ignore: master
-        requires:
-        - test
     - integration-test:
         requires:
-          - integration-test
+          - tests
         filters:
           branches:
             ignore: master
