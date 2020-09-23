@@ -47,3 +47,4 @@ workflows:
         filters:
           branches:
             ignore: master
+  version: 2
