@@ -1,6 +1,14 @@
 version: 2
 jobs:
-  build:
+  deploy:
+    docker:
+      - image: 'circleci/node:latest'
+    steps:
+      - checkout
+      - run:
+          name: release
+          command: ./scripts/deploy.sh
+  tests:
     docker:
       - image: 'circleci/node:latest'
     steps:
@@ -9,5 +17,32 @@ jobs:
           name: install
           command: npm install
       - run:
-          name: release
-          command: npm run semantic-release
+          name: checks script
+          command: ./scripts/checks.sh
+  integration-test:
+    docker:
+      - image: 'circleci/node:latest'
+    steps:
+      - checkout
+      - run:
+          name: install
+          command: npm install
+      # TODO: Add IT
+workflows:
+  deploy:
+    jobs:
+    - deploy:
+        filters:
+          branches:
+            only: master
+    - tests:
+        filters:
+          branches:
+            ignore: master
+    - integration-test:
+        requires:
+          - tests
+        filters:
+          branches:
+            ignore: master
+  version: 2
