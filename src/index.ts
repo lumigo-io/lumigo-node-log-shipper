@@ -10,17 +10,11 @@ export const shipLogs = async function(
 ): Promise<number> {
 	try {
 		const streamName = getStreamName();
-
 		const extractedRecord = extractAwsLogEvent(record);
-		console.log("b", extractedRecord);
-
 		logDebug(
 			`Got ${extractedRecord.logEvents.length} log events from ${extractedRecord.logGroup}`
 		);
 		let filteredRecord = filterMessagesFromRecord(extractedRecord, programaticError);
-
-		console.log(filteredRecord);
-
 		if (filteredRecord.logEvents.length > 0) {
 			logDebug(`About to send ${extractedRecord.logEvents.length} events`, {
 				streamName
