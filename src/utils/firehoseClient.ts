@@ -5,7 +5,7 @@ import AWS from "aws-sdk";
 import { assumeRole } from "./stsUtils";
 import { getCurrentRegion } from "./awsUtils";
 import { AwsLogSubscriptionEvent } from "../types/awsTypes";
-import { SELF_ACCOUNT_ID, TARGET_ACCOUNT_ID, TARGET_ENV } from "./consts";
+import { isSendingLogsToMyself, TARGET_ACCOUNT_ID, TARGET_ENV } from "./consts";
 import { logDebug } from "./logger";
 
 const ALLOW_RETRY_ERROR_CODES = ["ServiceUnavailableException", "InternalFailure"];
@@ -34,7 +34,7 @@ export class FirehoseClient {
 
 	private async getFirehoseClient(): Promise<AWS.Firehose> {
 		const region = getCurrentRegion();
-		if (this.accountId != TARGET_ACCOUNT_ID && TARGET_ACCOUNT_ID != SELF_ACCOUNT_ID) {
+		if (this.accountId != TARGET_ACCOUNT_ID && !isSendingLogsToMyself()) {
 			const stsResponse = await assumeRole(TARGET_ACCOUNT_ID, TARGET_ENV);
 			if (!stsResponse.Credentials) throw Error("AssumeRoleFailed");
 			logDebug("Create firehose client", {
