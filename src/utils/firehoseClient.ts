@@ -5,12 +5,15 @@ import AWS from "aws-sdk";
 import { assumeRole } from "./stsUtils";
 import { getCurrentRegion } from "./awsUtils";
 import { AwsLogSubscriptionEvent } from "../types/awsTypes";
+import { isSendingLogsToMyself, TARGET_ACCOUNT_ID, TARGET_ENV } from "./consts";
+import { logDebug } from "./logger";
 
 const ALLOW_RETRY_ERROR_CODES = ["ServiceUnavailableException", "InternalFailure"];
 
 const MAX_RETRY_COUNT = 3;
 const MAX_ITEM_SIZE = 1048576;
 const MAX_FIREHOSE_BATCH_SIZE = 250;
+const EOL = "\n";
 
 const getItemMaxSize = (): number => {
 	if (process.env.LUMIGO_ITEM_MAX_SIZE) {
@@ -30,15 +33,27 @@ export class FirehoseClient {
 	}
 
 	private async getFirehoseClient(): Promise<AWS.Firehose> {
-		const stsResponse = await assumeRole(this.accountId);
-		if (!stsResponse.Credentials) throw Error("AssumeRoleFailed");
 		const region = getCurrentRegion();
-		return new AWS.Firehose({
-			region: region,
-			accessKeyId: stsResponse.Credentials.AccessKeyId,
-			secretAccessKey: stsResponse.Credentials.SecretAccessKey,
-			sessionToken: stsResponse.Credentials.SessionToken
+		if (this.accountId != TARGET_ACCOUNT_ID && !isSendingLogsToMyself()) {
+			const stsResponse = await assumeRole(TARGET_ACCOUNT_ID, TARGET_ENV);
+			if (!stsResponse.Credentials) throw Error("AssumeRoleFailed");
+			logDebug("Create firehose client", {
+				accountId: this.accountId,
+				streamName: this.streamName,
+				targetAccountId: TARGET_ACCOUNT_ID
+			});
+			return new AWS.Firehose({
+				region: region,
+				accessKeyId: stsResponse.Credentials.AccessKeyId,
+				secretAccessKey: stsResponse.Credentials.SecretAccessKey,
+				sessionToken: stsResponse.Credentials.SessionToken
+			});
+		}
+		logDebug("Using local firshose client", {
+			accountId: this.accountId,
+			targetAccountId: TARGET_ACCOUNT_ID
 		});
+		return new AWS.Firehose({ region });
 	}
 
 	async putRecordsBatch(records: AwsLogSubscriptionEvent[]) {
@@ -107,17 +122,17 @@ export class FirehoseClient {
 		return await this.firehose.putRecordBatch(params).promise();
 	}
 
-	convertToFirehoseEvents(events: any[]): any[] {
+	convertToFirehoseEvents(events: AwsLogSubscriptionEvent[]): any[] {
 		let firehoseRecords: any[] = [];
 		events.forEach(function(event) {
 			try {
-				let eventAsString = JSON.stringify(event);
-				if (eventAsString != null) {
-					eventAsString += ",";
-					firehoseRecords.push({ Data: eventAsString });
-				}
+				const eventAsString = `${JSON.stringify(event)}${EOL}`;
+				firehoseRecords.push({ Data: eventAsString });
 			} catch (ex) {
-				// failed to convert record
+				logDebug("Failed to convert record", {
+					error: ex,
+					record: event
+				});
 			}
 		});
 		return firehoseRecords;
