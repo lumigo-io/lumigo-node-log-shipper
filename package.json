@@ -2,7 +2,7 @@
   "name": "@lumigo/lumigo-log-shipper",
   "version": "0.0.0-development",
   "description": "Lumigo Node.js Log Shipper",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
     "checks": "./scripts/checks.sh",
