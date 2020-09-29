@@ -30,14 +30,32 @@ commands:
             git clone git@github.com:lumigo-io/utils.git
             popd
 
+  checkout_code:
+    description: "Checkout code and test it"
+    steps:
+      - checkout
+      - run:
+          name: Check if tagged
+          command: |
+            tags=$(git tag -l --points-at HEAD)
+            echo "Tags $tags"
+            if [[ ! -z "$tags" ]]
+            then
+              echo "A tagged commit, skip..."
+              circleci step halt
+            fi
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
+
   checkout_integration_tests:
     description: "Checkout integration tests"
     steps:
       - run:
           command: |
             pip3 install gitpython=="3.0.8" colorama
-            cd ../utils/deployment/sls_deploy
+            pushd ../utils/deployment/sls_deploy
             python3 main.py --branch ${CIRCLE_BRANCH} --git-clone-only
+            popd
 
 jobs:
   deploy:
@@ -78,6 +96,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ../
+      - checkout_code
       - checkout_utils
       - checkout_integration_tests
       - run: ~/utils/common_bash/prepare_ci.sh
