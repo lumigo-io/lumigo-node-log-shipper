@@ -47,7 +47,7 @@ jobs:
       - run:
           name: release
           command: ./scripts/deploy.sh
-  tests:
+  test:
     <<: *defaults
     steps:
       - checkout
@@ -118,7 +118,7 @@ workflows:
         filters:
           branches:
             only: master
-    - tests:
+    - test:
         filters:
           branches:
             ignore: master
