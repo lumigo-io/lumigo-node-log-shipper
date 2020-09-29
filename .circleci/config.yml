@@ -30,7 +30,6 @@ commands:
             git clone git@github.com:lumigo-io/utils.git
             popd
 
-
   checkout_integration_tests:
     description: "Checkout integration tests"
     steps:
@@ -65,6 +64,7 @@ jobs:
     environment:
       NODE_OPTIONS: --max_old_space_size=6096
     steps:
+      - checkout
       - checkout_utils
       - run: ./scripts/ci_deploy.sh
       - persist_to_workspace:
