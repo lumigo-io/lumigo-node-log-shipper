@@ -1,4 +1,62 @@
-version: 2
+version: 2.1
+defaults: &defaults
+  working_directory: ~/lumigo-node-log-shipper
+  docker:
+  - image: lumigo/ci:latest
+    auth:
+      username: lumigo
+      password: $DOCKERHUB_PASSWORD
+commands:
+  checkout_credentials:
+    description: "Checkout credentials"
+    steps:
+      - run:
+          command: |
+            cd ..
+            git clone git@github.com:lumigo-io/common-resources.git
+
+  checkout_utils:
+    description: "Checkout various utilities"
+    steps:
+      - run:
+          command: |
+            mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+            pushd ..
+            git clone git@github.com:lumigo-io/common-resources.git
+            popd
+      - run:
+          command: |
+            pushd ..
+            git clone git@github.com:lumigo-io/utils.git
+            popd
+
+  checkout_code:
+    description: "Checkout code and test it"
+    steps:
+      - checkout
+      - run:
+          name: Check if tagged
+          command: |
+            tags=$(git tag -l --points-at HEAD)
+            echo "Tags $tags"
+            if [[ ! -z "$tags" ]]
+            then
+              echo "A tagged commit, skip..."
+              circleci step halt
+            fi
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
+
+  checkout_integration_tests:
+    description: "Checkout integration tests"
+    steps:
+      - run:
+          command: |
+            pip3 install gitpython=="3.0.8" colorama
+            pushd ../utils/deployment/sls_deploy
+            python3 main.py --branch ${CIRCLE_BRANCH} --git-clone-only
+            popd
+
 jobs:
   deploy:
     docker:
@@ -8,9 +66,8 @@ jobs:
       - run:
           name: release
           command: ./scripts/deploy.sh
-  tests:
-    docker:
-      - image: 'circleci/node:latest'
+  test:
+    <<: *defaults
     steps:
       - checkout
       - run:
@@ -19,15 +76,62 @@ jobs:
       - run:
           name: checks script
           command: ./scripts/checks.sh
-  integration-test:
-    docker:
-      - image: 'circleci/node:latest'
+  be-deploy:
+    <<: *defaults
+    resource_class: medium+
+    environment:
+      NODE_OPTIONS: --max_old_space_size=6096
     steps:
       - checkout
+      - checkout_utils
+      - run: ./scripts/ci_deploy.sh
+      - persist_to_workspace:
+          root: ../
+          paths:
+            - .aws/
+  integration-test:
+    <<: *defaults
+    environment:
+      NODE_OPTIONS: --max_old_space_size=4096
+    steps:
+      - attach_workspace:
+          at: ../
+      - checkout_code
+      - checkout_utils
+      - checkout_integration_tests
+      - run: ~/utils/common_bash/prepare_ci.sh
+      - run: cd ../integration-tests && npm i
+      - run: cd ../integration-tests && sudo npm install -g recursive-install
+      - run: cd ../integration-tests && git rev-parse HEAD > ../commits && cd ../python_tracer && git rev-parse HEAD >> ../commits &&  cd ../lumigo-node && git rev-parse HEAD >> ../commits &&  cd ../java-tracer && git rev-parse HEAD >> ../commits
+      - restore_cache:
+          keys:
+            - IT-{{ .Branch }}-{{ checksum "../commits" }}
+      - run: cd ../integration-tests && ./scripts/parallel_prepare_env.sh
+      - run: cd ../integration-tests && ./scripts/parallel_deploy.sh
+      - save_cache:
+          key: IT-{{ .Branch }}-{{ checksum "../commits" }}
+          paths:
+            - ../integration-tests/src/e2e-test/cypress.env.json
+            - ../integration-tests/src/e2e-test/cypress/cf-stack.json
+            - ../integration-tests/.env
+            - ../integration-tests/.env2
+            - ../integration-tests/.env3
+            - ../integration-tests/.deployment_finished.env
+            - ../integration-tests/.deployment_finished.env2
+            - ../integration-tests/.deployment_finished.env3
       - run:
-          name: install
-          command: npm install
-      # TODO: Add IT
+          command: cd ../integration-tests && export CURRENT_REPO=lumigo-node-log-shipper && npm run test-parallel
+          no_output_timeout: 30m
+      - store_test_results:
+          path: ../integration-tests/src/test/test-results
+      - run: mkdir -p ../envs && cd ../integration-tests && cp src/e2e-test/cypress.env.json ../envs
+      - run: mkdir -p ../stack && cd ../integration-tests && cp src/e2e-test/cypress/cf-stack.json ../stack
+      - persist_to_workspace:
+          root: ../
+          paths:
+            - envs/
+            - stack/
+            - .aws/
 workflows:
   deploy:
     jobs:
@@ -35,14 +139,20 @@ workflows:
         filters:
           branches:
             only: master
-    - tests:
+    - test:
         filters:
           branches:
             ignore: master
-    - integration-test:
+    - be-deploy:
+        filters:
+          branches:
+            ignore: master
         requires:
-          - tests
+          - test
+    - integration-test:
         filters:
           branches:
             ignore: master
+        requires:
+          - be-deploy
   version: 2
