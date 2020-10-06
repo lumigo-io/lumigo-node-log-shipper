@@ -13,19 +13,19 @@ $ npm i @lumigo/lumigo-log-shipper
 
 In your lambda's code: 
 ~~~js
-const LumigoLogger = require("@lumigo/lumigo-log-shipper");
+const {shipLogs} = require("@lumigo/lumigo-log-shipper");
 
 module.exports.<HANDLER_NAME> = (event, context, callback) => {
-  LumigoLogger.shipLogs(event); 
+  shipLogs(event); 
 };
 ~~~
 
 With programtic error:
 ~~~js
-const LumigoLogger = require("@lumigo/lumigo-log-shipper");
+const {shipLogs} = require("@lumigo/lumigo-log-shipper");
 
 module.exports.<HANDLER_NAME> = (event, context, callback) => {
-  LumigoLogger.shipLogs(event, "[Error]"); 
+  shipLogs(event, "[Error]"); 
 };
 ~~~
 Add to your lambda's `serverless.yml`
