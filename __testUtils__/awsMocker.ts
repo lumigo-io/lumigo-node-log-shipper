@@ -8,8 +8,8 @@ export class AwsMocker {
 			return {
 				Firehose: AwsFirehoseClient,
 				config: {
-					update: noop
-				}
+					update: noop,
+				},
 			};
 		});
 	};

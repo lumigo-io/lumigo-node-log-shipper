@@ -7,8 +7,8 @@ export const STS_MOCKED_RESPONSE: any = {
 	Credentials: {
 		AccessKeyId: "AccessKeyId",
 		SecretAccessKey: "SecretAccessKey",
-		SessionToken: "SessionToken"
-	}
+		SessionToken: "SessionToken",
+	},
 };
 
 //TODO: Remove this mocks into a infra mocker
