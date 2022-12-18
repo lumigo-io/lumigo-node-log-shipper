@@ -5,7 +5,7 @@ import { AwsLogEvent } from "../../src/types/awsTypes";
 const eventFromMessage = (message: string): AwsLogEvent => ({
 	message: message,
 	id: "Dummy",
-	timestamp: 123456
+	timestamp: 123456,
 });
 
 describe("general utils functionality ", () => {

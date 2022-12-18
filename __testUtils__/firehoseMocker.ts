@@ -39,7 +39,7 @@ export class AwsFirehoseClient {
 					...record,
 					// @ts-ignore
 					ErrorCode: "ServiceUnavailableException",
-					ErrorMessage: "ServiceUnavailableException bla bla bla"
+					ErrorMessage: "ServiceUnavailableException bla bla bla",
 				};
 			}
 			records.push(record);
@@ -52,7 +52,7 @@ export class AwsFirehoseClient {
 		return {
 			promise: async () => {
 				return AwsFirehoseClient.createFhResponse(params.Records.length, failed);
-			}
+			},
 		};
 	}
 }

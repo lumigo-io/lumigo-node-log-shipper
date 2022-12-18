@@ -11,7 +11,7 @@ export async function assumeRole(
 		.assumeRole({
 			RoleArn: `arn:aws:iam::${targetAccountId}:role/${targetEnv}-CustomerLogsWriteRole`,
 			RoleSessionName: "AssumeCrossAccountRole",
-			DurationSeconds: 900
+			DurationSeconds: 900,
 		})
 		.promise();
 }

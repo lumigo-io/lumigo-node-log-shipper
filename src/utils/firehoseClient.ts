@@ -1,12 +1,12 @@
-import { PromiseResult } from "aws-sdk/lib/request";
 import { AWSError } from "aws-sdk/lib/error";
+import { PromiseResult } from "aws-sdk/lib/request";
 
 import AWS from "aws-sdk";
-import { assumeRole } from "./stsUtils";
-import { getCurrentRegion } from "./awsUtils";
 import { AwsLogSubscriptionEvent } from "../types/awsTypes";
+import { getCurrentRegion } from "./awsUtils";
 import { isSendingLogsToMyself, TARGET_ACCOUNT_ID, TARGET_ENV } from "./consts";
 import { logDebug } from "./logger";
+import { assumeRole } from "./stsUtils";
 
 const ALLOW_RETRY_ERROR_CODES = ["ServiceUnavailableException", "InternalFailure"];
 
@@ -40,18 +40,18 @@ export class FirehoseClient {
 			logDebug("Create firehose client", {
 				accountId: this.accountId,
 				streamName: this.streamName,
-				targetAccountId: TARGET_ACCOUNT_ID
+				targetAccountId: TARGET_ACCOUNT_ID,
 			});
 			return new AWS.Firehose({
 				region: region,
 				accessKeyId: stsResponse.Credentials.AccessKeyId,
 				secretAccessKey: stsResponse.Credentials.SecretAccessKey,
-				sessionToken: stsResponse.Credentials.SessionToken
+				sessionToken: stsResponse.Credentials.SessionToken,
 			});
 		}
 		logDebug("Using local firshose client", {
 			accountId: this.accountId,
-			targetAccountId: TARGET_ACCOUNT_ID
+			targetAccountId: TARGET_ACCOUNT_ID,
 		});
 		return new AWS.Firehose({ region });
 	}
@@ -114,7 +114,7 @@ export class FirehoseClient {
 	): Promise<PromiseResult<AWS.Firehose.Types.PutRecordBatchOutput, AWSError>> {
 		let params = {
 			DeliveryStreamName: streamName,
-			Records: records
+			Records: records,
 		};
 		if (!this.firehose) {
 			this.firehose = await this.getFirehoseClient();
@@ -124,14 +124,14 @@ export class FirehoseClient {
 
 	convertToFirehoseEvents(events: AwsLogSubscriptionEvent[]): any[] {
 		let firehoseRecords: any[] = [];
-		events.forEach(function(event) {
+		events.forEach(function (event) {
 			try {
 				const eventAsString = `${JSON.stringify(event)}${EOL}`;
 				firehoseRecords.push({ Data: eventAsString });
 			} catch (ex) {
 				logDebug("Failed to convert record", {
 					error: ex,
-					record: event
+					record: event,
 				});
 			}
 		});
@@ -140,7 +140,7 @@ export class FirehoseClient {
 
 	handleRetryItems(allRecords: any[], retryItems: any[]): any[] {
 		let retryBatch: any[] = [];
-		retryItems.forEach(function(item) {
+		retryItems.forEach(function (item) {
 			retryBatch.push(allRecords[item]);
 		});
 		return retryBatch;
@@ -148,8 +148,8 @@ export class FirehoseClient {
 
 	parseFirehoseProblematicRecords(records: any[]) {
 		let retryItems: any[] = [];
-		records.forEach(function(record, index) {
-			if (record.hasOwnProperty("ErrorCode")) {
+		records.forEach(function (record, index) {
+			if (Object.prototype.hasOwnProperty.call(record, "ErrorCode")) {
 				if (ALLOW_RETRY_ERROR_CODES.includes(record["ErrorCode"])) {
 					retryItems.push(index);
 				}

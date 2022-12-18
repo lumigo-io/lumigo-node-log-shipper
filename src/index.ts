@@ -4,7 +4,7 @@ import { filterMessagesFromRecord } from "./utils/generalUtils";
 import { getStreamName } from "./utils/consts";
 import { logDebug } from "./utils/logger";
 
-export const shipLogs = async function(
+export const shipLogs = async function (
 	record: any,
 	programaticError?: string
 ): Promise<number> {
@@ -17,7 +17,7 @@ export const shipLogs = async function(
 		let filteredRecord = filterMessagesFromRecord(extractedRecord, programaticError);
 		if (filteredRecord.logEvents.length > 0) {
 			logDebug(`About to send ${extractedRecord.logEvents.length} events`, {
-				streamName
+				streamName,
 			});
 			let firehose = new FirehoseClient(streamName, filteredRecord.owner);
 			return await firehose.putRecordsBatch([filteredRecord]);

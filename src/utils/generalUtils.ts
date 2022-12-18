@@ -11,14 +11,14 @@ let FILTER_KEYWORDS = [
 	"Invoke Error",
 	"Uncaught Exception",
 	"Unhandled Promise Rejection",
-	"Traceback"
+	"Traceback",
 ];
 
-export const isValidEvent = function(record: AwsLogEvent): boolean {
-	return FILTER_KEYWORDS.some(filterWord => record.message.includes(filterWord));
+export const isValidEvent = function (record: AwsLogEvent): boolean {
+	return FILTER_KEYWORDS.some((filterWord) => record.message.includes(filterWord));
 };
 
-export const filterMessagesFromRecord = function(
+export const filterMessagesFromRecord = function (
 	record: AwsLogSubscriptionEvent,
 	programaticError?: string
 ): AwsLogSubscriptionEvent {
